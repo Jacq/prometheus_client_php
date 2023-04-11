@@ -15,7 +15,7 @@
         "lkaemmerling/prometheus_client_php": "*"
     },
     "require": {
-        "php": "^7.2",
+        "php": "^8.2",
         "ext-json": "*"
     },
     "require-dev": {
