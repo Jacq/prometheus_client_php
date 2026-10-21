@@ -59,11 +59,10 @@ class RedisSentinelTest extends TestCase
     public function itShouldThrowExceptionWhenInjectedRedisIsNotConnected(): void
     {
         $connection = new \Redis();
-        // @phpstan-ignore arguments.count
-        
-        $sentinel = version_compare((string)phpversion('redis'), '6.0', '>=') ? 
-                        new \RedisSentinel(['host' => '/dev/null']) :
-                        new \RedisSentinel('/dev/null');
+
+        $sentinel = version_compare((string)phpversion('redis'), '6.0', '>=') ?
+                        new \RedisSentinel(['host' => '/dev/null']) : // @phpstan-ignore arguments.count, argument.type
+                        new \RedisSentinel('/dev/null'); // @phpstan-ignore arguments.count
 
         self::expectException(StorageException::class);
         self::expectExceptionMessageMatches("/Can't connect to RedisSentinel server\\..*/");
@@ -88,8 +87,37 @@ class RedisSentinelTest extends TestCase
     /**
      * @test
      */
+    public function itShouldGetMasterWhenRetryingIndefinitely(): void
+    {
+        $redis = new Redis(['host' => REDIS_HOST,
+            'sentinel' => ['host' => REDIS_SENTINEL_HOST, 'enable' => true, 'service' => 'myprimary', 'reconnect' => -1]
+        ]);
+
+        $redis->collect();
+        $redis->wipeStorage();
+        $this->expectNotToPerformAssertions();
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldThrowAfterExhaustingReconnects(): void
+    {
+        $redis = new Redis(['host' => REDIS_HOST,
+            'sentinel' => ['host' => REDIS_HOST, 'port' => 1, 'enable' => true, 'service' => 'myprimary', 'reconnect' => 2]
+        ]);
+
+        $this->expectException(StorageException::class);
+        $this->expectExceptionMessage("Can't connect to RedisSentinel server");
+
+        $redis->collect();
+    }
+
+    /**
+     * @test
+     */
     public function itShouldGetMaster(): void
-    { 
+    {
         $redis = new Redis(['host' => REDIS_HOST,
             'sentinel' => ['host' => REDIS_SENTINEL_HOST, 'enable' => true, 'service' => 'myprimary']
         ]);

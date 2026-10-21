@@ -15,25 +15,27 @@
         "lkaemmerling/prometheus_client_php": "*"
     },
     "require": {
-        "php": "^7.4|^8.0",
+        "php": "^8.2",
         "ext-json": "*"
     },
     "require-dev": {
-        "guzzlehttp/guzzle": "^6.3|^7.0",
+        "guzzlehttp/guzzle": "^6.3|^7.0|^8.0",
         "phpstan/extension-installer": "^1.0",
         "phpstan/phpstan": "^1.5.4",
         "phpstan/phpstan-phpunit": "^1.1.0",
         "phpstan/phpstan-strict-rules": "^1.1.0",
         "phpunit/phpunit": "^9.4",
-        "squizlabs/php_codesniffer": "^3.6",
+        "predis/predis": "^2.3",
+        "squizlabs/php_codesniffer": "^3.6 || ^4.0",
         "symfony/polyfill-apcu": "^1.6"
     },
     "suggest": {
         "ext-redis": "Required if using Redis.",
+        "predis/predis": "Required if using Predis.",
         "ext-apc": "Required if using APCu.",
         "ext-pdo": "Required if using PDO.",
         "promphp/prometheus_push_gateway_php": "An easy client for using Prometheus PushGateway.",
-        "symfony/polyfill-apcu": "Required if you use APCu on PHP8.0+"
+        "symfony/polyfill-apcu": "Required if you use APCu."
     },
     "autoload": {
         "psr-4": {

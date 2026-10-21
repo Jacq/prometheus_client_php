@@ -6,10 +6,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        php: [ 8.1, 8.2, 8.3, 8.4 ]
-        redis-version: [ 5, 6, 7 ]
+        php: [ 8.2, 8.3, 8.4, 8.5 ]
+        redis-version: [ 5, 6, 7, 8 ]
 
     name: P${{ matrix.php }} - Redis ${{ matrix.redis-version }}
 
@@ -55,6 +55,7 @@ jobs:
           path: ~/.composer/cache/files
           key: dependencies-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
       - name: Login to Docker Hub
+        continue-on-error: true
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}

@@ -1,6 +1,7 @@
 # A prometheus client library written in PHP
 
 ![Tests](https://github.com/promphp/prometheus_client_php/workflows/Tests/badge.svg)
+[![Slack](https://img.shields.io/badge/Slack-join%20chat-brightgreen)](https://join.slack.com/t/promphp/shared_invite/zt-iqbocinr-R809BvkEhjuC9W6RRoOofA)
 
 This library uses Redis or APCu to do the client side aggregation.
 If using Redis, we recommend running a local Redis instance next to your PHP workers.
@@ -8,8 +9,8 @@ If using Redis, we recommend running a local Redis instance next to your PHP wor
 ## How does it work?
 
 Usually PHP worker processes don't share any state.
-You can pick from four adapters.
-Redis, APC, APCng, or an in-memory adapter.
+You can pick from five adapters.
+Redis, Predis, APC, APCng, or an in-memory adapter.
 While the first needs a separate binary running, the second and third just need the [APC](https://pecl.php.net/package/APCU) extension to be installed. If you don't need persistent metrics between requests (e.g. a long running cron job or script) the in-memory adapter might be suitable to use.
 
 ## Installation
@@ -23,6 +24,7 @@ composer require promphp/prometheus_client_php
 ## Usage
 
 A simple counter:
+
 ```php
 \Prometheus\CollectorRegistry::getDefault()
     ->getOrRegisterCounter('', 'some_quick_counter', 'just a quick measurement')
@@ -30,6 +32,7 @@ A simple counter:
 ```
 
 Write some enhanced metrics:
+
 ```php
 $registry = \Prometheus\CollectorRegistry::getDefault();
 
@@ -47,6 +50,7 @@ $summary->observe(5, ['blue']);
 ```
 
 Manually register and retrieve metrics (these steps are combined in the `getOrRegister...` methods):
+
 ```php
 $registry = \Prometheus\CollectorRegistry::getDefault();
 
@@ -59,6 +63,7 @@ $counterB->incBy(2, ['red']);
 ```
 
 Expose the metrics:
+
 ```php
 $registry = \Prometheus\CollectorRegistry::getDefault();
 
@@ -70,6 +75,7 @@ echo $result;
 ```
 
 Change the Redis options (the example shows the defaults):
+
 ```php
 \Prometheus\Storage\Redis::setDefaultOptions(
     [
@@ -97,7 +103,23 @@ Change the Redis options (the example shows the defaults):
 );
 ```
 
+Using the Predis storage (requires `predis/predis`):
+
+```php
+$registry = new CollectorRegistry(new \Prometheus\Storage\Predis());
+```
+
+Or with an existing connection:
+
+```php
+$client = new \Predis\Client(['host' => '127.0.0.1']);
+$registry = new CollectorRegistry(\Prometheus\Storage\Predis::fromExistingConnection($client));
+```
+
+> **Note:** Using `Redis::setPrefix()` and `Predis::setPrefix()` share the same prefix. Using both adapters with different prefixes in the same application is not supported.
+
 Using the InMemory storage:
+
 ```php
 $registry = new CollectorRegistry(new InMemory());
 
@@ -109,14 +131,17 @@ $result = $renderer->render($registry->getMetricFamilySamples());
 ```
 
 Using the APC or APCng storage:
+
 ```php
 $registry = new CollectorRegistry(new APCng());
  or
 $registry = new CollectorRegistry(new APC());
 ```
+
 (see the `README.APCng.md` file for more details)
 
 Using the PDO storage:
+
 ```php
 $registry = new CollectorRegistry(new \PDO('mysql:host=localhost;dbname=prometheus', 'username', 'password'));
  or
@@ -126,11 +151,13 @@ $registry = new CollectorRegistry(new \PDO('sqlite::memory:'));
 ### Advanced Usage
 
 #### Advanced Histogram Usage
+
 On passing an empty array for the bucket parameter on instantiation, a set of default buckets will be used instead.
 Whilst this is a good base for a typical web application, there is named constructor to assist in the generation of
 exponential / geometric buckets.
 
 Eg:
+
 ```
 Histogram::exponentialBuckets(0.05, 1.5, 10);
 ```
@@ -140,7 +167,9 @@ This will start your buckets with a value of 0.05, grow them by a factor of 1.5 
 Also look at the [examples](examples).
 
 #### PushGateway Support
-As of Version 2.0.0 this library doesn't support the Prometheus PushGateway anymore because we want to have this package as small als possible. If you need Prometheus PushGateway support, you could use the companion library:  https://github.com/PromPHP/prometheus_push_gateway_php
+
+As of Version 2.0.0 this library doesn't support the Prometheus PushGateway anymore because we want to have this package as small als possible. If you need Prometheus PushGateway support, you could use the companion library:  <https://github.com/PromPHP/prometheus_push_gateway_php>
+
 ```
 composer require promphp/prometheus_push_gateway_php
 ```
@@ -149,18 +178,20 @@ composer require promphp/prometheus_push_gateway_php
 
 ### Dependencies
 
-* PHP ^7.2 | ^8.0
+* PHP ^8.2 (only [supported PHP versions](https://www.php.net/supported-versions.php) are supported)
 * PHP Redis extension
 * PHP APCu extension
 * [Composer](https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx)
 * Redis
 
 Start a Redis instance:
+
 ```
 docker-compose up redis
 ```
 
 Run the tests:
+
 ```
 composer install
 
@@ -172,9 +203,11 @@ composer install
 ## Black box testing
 
 Just start the nginx, fpm & Redis setup with docker-compose:
+
 ```
 docker-compose up
 ```
+
 Pick the adapter you want to test.
 
 ```
@@ -186,11 +219,13 @@ docker-compose run phpunit env ADAPTER=redis vendor/bin/phpunit tests/Test/
 ## Performance testing
 
 This currently tests the APC and APCng adapters head-to-head and reports if the APCng adapter is slower for any actions.
+
 ```
 phpunit vendor/bin/phpunit tests/Test/ --group Performance
 ```
 
 The test can also be run inside a container.
+
 ```
 docker-compose up
 docker-compose run phpunit vendor/bin/phpunit tests/Test/ --group Performance

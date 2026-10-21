@@ -11,6 +11,8 @@ if ($adapterName === 'redis') {
     define('REDIS_SENTINEL_HOST', $_SERVER['REDIS_SENTINEL_HOST'] ?? '127.0.0.1');
 
     $adapter = new Prometheus\Storage\Redis(['host' => REDIS_HOST, 'sentinel' => ['host' => REDIS_SENTINEL_HOST]]);
+} elseif ($adapterName === 'predis') {
+    $adapter = new Prometheus\Storage\Predis(['host' => $_SERVER['REDIS_HOST'] ?? '127.0.0.1']);
 } elseif ($adapterName === 'apc') {
     $adapter = new Prometheus\Storage\APC();
 } elseif ($adapterName === 'apcng') {
